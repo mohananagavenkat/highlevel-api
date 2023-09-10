@@ -2,6 +2,8 @@ const Transaction = require('../models/transaction');
 const Wallet = require('../models/wallet');
 const asyncHandler = require('express-async-handler');
 const { runInTransaction } = require('../utils/runTransaction');
+const { createExcel } = require('../utils/excel');
+const { head } = require('../app');
 
 const makeTransaction = asyncHandler(async ({ walletId, amount, description }) => {
   const wallet = await Wallet.findOne({ _id: walletId });
@@ -48,7 +50,47 @@ const getTransactions = asyncHandler(async ({ walletId, limit, offset, sortBy, s
   };
 });
 
+const downloadTransactions = asyncHandler(async ({ walletId }) => {
+
+  const transactions = await Transaction.find({ wallet: walletId }).lean();
+
+  const header = [
+    {
+      header: 'Id',
+      key: '_id',
+    },
+    {
+      header: 'Transaction Type',
+      key: 'type',
+    },
+    {
+      header: 'Amount',
+      key: 'amount',
+    },
+    {
+      header: 'Balance Left',
+      key: 'balance',
+    },
+    {
+      header: 'Description',
+      key: 'description',
+    },
+    {
+      header: 'Date',
+      key: 'createdAt',
+    },
+  ];
+
+  const body = transactions.map(({ _id, type, amount, balance, description, createdAt }) => ({
+    _id, type, amount, balance, description, createdAt
+  }))
+
+  return createExcel({ serviceName: 'transactions', excelHeader: header, excelBody: body })
+
+});
+
 module.exports = {
   makeTransaction,
-  getTransactions
+  getTransactions,
+  downloadTransactions
 }

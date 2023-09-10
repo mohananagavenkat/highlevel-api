@@ -12,6 +12,15 @@ const makeTransaction = asyncHandler(async (req, res) => {
 
 });
 
+const downloadTransactions = asyncHandler(async (req, res) => {
+  const { walletId } = req.params;
+
+  const file = await transactionService.downloadTransactions({ walletId });
+
+  return res.download(file);
+
+});
+
 const getTransactions = asyncHandler(async (req, res) => {
 
   const { walletId, limit, offset, sortBy, sortDirection } = req.query;
@@ -24,5 +33,6 @@ const getTransactions = asyncHandler(async (req, res) => {
 
 module.exports = {
   makeTransaction,
-  getTransactions
+  getTransactions,
+  downloadTransactions
 };
