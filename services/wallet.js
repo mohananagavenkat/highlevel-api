@@ -4,9 +4,9 @@ const asyncHandler = require('express-async-handler');
 const registerWallet = asyncHandler(async ({ name, balance }) => {
   const existingWallet = await Wallet.findOne({ name }).lean();
   if(existingWallet) return existingWallet;
-  const newWallet = await Wallet.create({
+  const newWallet = (await Wallet.create({
     name, balance
-  }).lean();
+  })).toObject();
   return newWallet;
 });
 
